@@ -1,0 +1,6 @@
+os_username       = "user-xxxxxxxxxxxxx"
+os_password       = "openstack-password"
+os_tenant_name     = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+os_region         = "XXXX"
+os_identity_endpoint = "https://xxxxxxx.xx/xx"
+os_domain_name       = "xxxxxxxx"

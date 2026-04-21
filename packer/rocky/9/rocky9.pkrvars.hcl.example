@@ -1,0 +1,7 @@
+source_image_name = "source_os"
+flavor = "your_flavor"
+image_name = "template_image_name"
+networks = ["your-openstack-networks"]
+
+ssh_username = "user"
+ssh_timeout = "10m"
