@@ -5,7 +5,8 @@ build {
     inline = [
       "cloud-init status --wait || true",
       "sudo dnf update -y",
-      "sudo dnf install -y vim curl git"
+      "sudo dnf install -y vim curl git",
+      "sudo setenforce 0"
     ]
   }
 }
