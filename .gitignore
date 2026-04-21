@@ -1,4 +1,11 @@
+# Packer
 *.pkrvars.hcl
+
+# Terraform
 *.tfvars
 *tfstate*
 *lock*
+.terraform
+
+# Openstack
+rc_file.sh

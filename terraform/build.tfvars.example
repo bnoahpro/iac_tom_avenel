@@ -1,0 +1,9 @@
+### Keypair
+ssh_public_key = "ssh_pub_key"
+keypair_name   = "your_keypair_name"
+
+### vm
+vm_name_prefix    = "vm_name_prefix"
+image_name = "vm template name"
+flavor = "vm flavor"
+network_name = "vm network"
