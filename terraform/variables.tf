@@ -45,7 +45,11 @@ variable "vm_name_prefix" {
   type = string
 }
 
-variable "network_name" {
+variable "private_network_name" {
+  type = string
+}
+
+variable "floating_ip" {
   type = string
 }
 
