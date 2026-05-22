@@ -43,6 +43,7 @@
         marker: "# {mark} ANSIBLE K3S HOSTS"
         block: |
           {{ inventory_hostname }}   {{ k3s_fqdn }}
+          {{ inventory_hostname }}   argocd.{{ k3s_fqdn }}
           {{ inventory_hostname }}   django-app.{{ k3s_fqdn }}
       delegate_to: localhost
 
@@ -65,7 +66,7 @@
       delay: 5
       loop:
         - ingress-nginx
-        - django-app
+        - argocd
       loop_control:
         loop_var: service
       delegate_to: localhost
@@ -79,6 +80,6 @@
         kubeconfig: "{{ kubeconfig }}"
       delegate_to: localhost
       register: django_app_pod_info
-      until: django_app_pod_info.resources[0].status.phase == "Running"
+      until: django_app_pod_info.resources[0] is defined and django_app_pod_info.resources[0].status.phase == "Running"
       retries: 10
-      delay: 10
+      delay: 60

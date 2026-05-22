@@ -1,0 +1,3 @@
+- op: add
+  path: /spec/source/targetRevision
+  value: k8s-staging
