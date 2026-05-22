@@ -1,0 +1,50 @@
+name: Continuous Deployment - Infra & Config
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: CICD-main
+
+    env:
+      TF_VAR_os_username: ${{ secrets.OS_USERNAME }}
+      TF_VAR_os_password: ${{ secrets.OS_PASSWORD }}
+      TF_VAR_os_tenant_name: ${{ secrets.OS_TENANT_NAME}}
+      TF_VAR_os_region: ${{ secrets.OS_REGION }}
+      TF_VAR_os_identity_endpoint: ${{ secrets.OS_IDENTITY_ENDPOINT }}
+      TF_VAR_os_domain_name: ${{ secrets.OS_DOMAIN_NAME }}
+
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ./terraform 
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+        working-directory: ./terraform
+
+      - name: Install SSH Key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Run Ansible Playbook
+        run: |
+          sudo apt-get update && sudo apt-get install -y ansible python3-pip
+          pip3 install -r requirements.txt
+          ansible-galaxy collection install -r requirements.yml
+          ansible-playbook -i inventory/inventory.yaml playbooks/k3s/deploy_django_app_infra.yaml -vv
+        working-directory: ./ansible
