@@ -33,7 +33,7 @@ jobs:
         working-directory: ./terraform 
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve
+        run: terraform apply -auto-approve -var-file=common.tfvars -var-file=build.tfvars
         working-directory: ./terraform
 
       - name: Install SSH Key
@@ -45,6 +45,14 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install -y ansible python3-pip
           pip3 install -r requirements.txt
-          ansible-galaxy collection install -r requirements.yml
-          ansible-playbook -i inventory/inventory.yaml playbooks/k3s/deploy_django_app_infra.yaml -vv
+          ansible-galaxy collection install -r requirements.yaml
+          ansible-playbook -i inventory/inventory.yaml \
+          -e "kubeconfig_dir=/home/runner/kubeconfig" \
+          -e "ansible_python_interpreter=/usr/bin/python3" \
+          playbooks/k3s/deploy_django_app_infra.yaml -vv
         working-directory: ./ansible
+
+      - name: Terraform Destroy
+        if: always()
+        run: terraform destroy -auto-approve -var-file=common.tfvars -var-file=build.tfvars
+        working-directory: ./terraform

@@ -13,8 +13,10 @@
     dest: "{{ local_trust_store }}/{{ k3s_hostname }}-root-ca.crt"
     mode: "0644"
   delegate_to: localhost
+  no_log: true
 
 - name: Update trust store
   ansible.builtin.shell:
     cmd: update-ca-certificates
   delegate_to: localhost
+  no_log: true

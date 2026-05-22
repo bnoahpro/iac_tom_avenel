@@ -81,5 +81,5 @@
       delegate_to: localhost
       register: django_app_pod_info
       until: django_app_pod_info.resources[0] is defined and django_app_pod_info.resources[0].status.phase == "Running"
-      retries: 10
-      delay: 60
+      retries: 20
+      delay: 30
