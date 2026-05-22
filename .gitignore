@@ -9,3 +9,6 @@
 
 # Openstack
 rc_file.sh
+
+# Kubernetes
+charts/

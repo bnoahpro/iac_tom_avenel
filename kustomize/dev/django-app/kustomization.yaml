@@ -1,0 +1,27 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+labels:
+  - pairs:
+      env: dev
+
+components:
+  - ../../base/django-app
+
+namespace: django-app
+
+patches:
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: django-app-deployment
+      namespace: django-app
+    path: patches/deployment-patch.yaml
+  - target:
+      group: networking.k8s.io
+      version: v1
+      kind: Ingress
+      name: django-app-ingress
+      namespace: django-app
+    path: patches/ingress-patch.yaml
