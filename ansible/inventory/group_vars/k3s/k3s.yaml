@@ -1,5 +1,6 @@
 k3s_fqdn: "nba-k3s.local"
 k3s_hostname: "nba-k3s"
 k3s_version: "v1.35.3+k3s1"
-kubeconfig: "/home/noah-dev/.kube/kubeconfig/{{ k3s_fqdn }}.kc"
+kubeconfig_dir: "/tmp/kubeconfig"
+kubeconfig: "{{ kubeconfig_dir }}/{{ k3s_fqdn }}.kc"
 local_trust_store: "/usr/local/share/ca-certificates"
