@@ -3,4 +3,4 @@
   value: 1
 - op: add
   path: /spec/template/spec/containers/0/image
-  value: ghcr.io/bnoahpro/django-app:dev
+  value: ghcr.io/bnoahpro/django-app:prod
