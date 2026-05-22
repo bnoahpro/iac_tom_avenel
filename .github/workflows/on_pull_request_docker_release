@@ -1,0 +1,21 @@
+name: Docker Build PR Check
+
+on:
+  pull_request:
+    branches:
+      - docker_release
+
+jobs:
+  build-docker:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build de l'image Docker
+        run: |
+          docker build ./django_app/
