@@ -1,0 +1,84 @@
+# ansible-playbook -v -i inventory/inventory.yaml --limit nba-k3s.local \
+# playbooks/k3s/deploy_k3s.yaml
+
+########################
+# ---- Deploy K3s ---- #
+########################
+
+- name: Install K3s
+  hosts: k3s
+  gather_facts: true
+  become: true
+  tags: k3s_install
+
+  pre_tasks:
+    - name: Updating the operating system
+      ansible.builtin.dnf:
+        name: "*"
+        state: latest
+        update_cache: true
+
+    - name: Enable SELinux in enforcing mode
+      ansible.posix.selinux:
+        policy: targeted
+        state: permissive
+
+  tasks:
+    - name: Install k3s
+      tags: install_k3s
+      include_tasks: tasks/install_k3s.yaml
+
+    - name: Import k3s CA certificate in local trust store
+      tags: k3s_ca
+      include_tasks: tasks/import_k3s_ca.yaml
+
+    - name: Import k3s kubeconfig in localhost
+      tags: k3s_kubeconfig
+      include_tasks: tasks/import_k3s_kubeconfig.yaml
+
+    - name: Add k3s server to /etc/hosts
+      tags: k3s_hosts
+      blockinfile:
+        path: /etc/hosts
+        marker: "# {mark} ANSIBLE K3S HOSTS"
+        block: |
+          {{ inventory_hostname }}   {{ k3s_fqdn }}
+          {{ inventory_hostname }}   django-app.{{ k3s_fqdn }}
+      delegate_to: localhost
+
+########################################
+# ---- Deploy kubernetes services ---- #
+########################################
+
+- name: Install Kubernetes services
+  hosts: k3s
+  gather_facts: false
+  connection: local
+  tags: k3s_services
+  tasks:
+    - name: Deploy kubernetes services
+      ansible.builtin.shell:
+        cmd: |
+          kustomize build --enable-helm --load-restrictor=LoadRestrictionsNone {{ playbook_dir }}/../../../kustomize/{{ env }}/{{ service }} | \
+          kubectl --kubeconfig {{ kubeconfig }} apply -f -
+      retries: 5
+      delay: 5
+      loop:
+        - ingress-nginx
+        - django-app
+      loop_control:
+        loop_var: service
+      delegate_to: localhost
+
+    - name: Succes when django_app is running
+      kubernetes.core.k8s_info:
+        kind: Pod
+        label_selectors: 
+          - "app=django-app"
+        namespace: django-app
+        kubeconfig: "{{ kubeconfig }}"
+      delegate_to: localhost
+      register: django_app_pod_info
+      until: django_app_pod_info.resources[0].status.phase == "Running"
+      retries: 10
+      delay: 10

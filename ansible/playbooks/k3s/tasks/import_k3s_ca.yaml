@@ -1,0 +1,20 @@
+- name: Get root-ca.pem value
+  ansible.builtin.slurp:
+    src: /var/lib/rancher/k3s/server/tls/root-ca.crt
+  register: root_ca_cert_slurp
+
+- ansible.builtin.set_fact:
+    k3s_root_ca_cert: "{{ root_ca_cert_slurp['content'] | b64decode }}"
+  no_log: true
+
+- name: Write root-ca.pem in localhost
+  ansible.builtin.copy:
+    content: "{{ k3s_root_ca_cert }}"
+    dest: "{{ local_trust_store }}/{{ k3s_hostname }}-root-ca.crt"
+    mode: "0644"
+  delegate_to: localhost
+
+- name: Update trust store
+  ansible.builtin.shell:
+    cmd: update-ca-certificates
+  delegate_to: localhost

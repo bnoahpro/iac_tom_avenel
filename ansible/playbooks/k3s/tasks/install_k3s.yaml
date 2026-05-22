@@ -1,0 +1,21 @@
+- name: Generate k3s rootCA
+  ansible.builtin.shell:
+    cmd: curl -sL https://github.com/k3s-io/k3s/raw/main/contrib/util/generate-custom-ca-certs.sh | bash -
+
+- name: Download K3s install script
+  ansible.builtin.get_url:
+    url: https://get.k3s.io/
+    dest: /usr/local/bin/k3s-install.sh
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Deploy K3s server
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s-install.sh
+  environment:
+    INSTALL_K3S_EXEC: "server --disable=traefik --tls-san={{ k3s_fqdn }} --tls-san={{ inventory_hostname }}"
+    INSTALL_K3S_SKIP_DOWNLOAD: selinux
+    INSTALL_K3S_VERSION: "{{ k3s_version }}"
+  register: result_k3s_deployement
+  changed_when: result_k3s_deployement.rc == 0 and "[INFO]  No change detected so skipping service start" not in result_k3s_deployement.stdout
